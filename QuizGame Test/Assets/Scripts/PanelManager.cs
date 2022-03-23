@@ -9,7 +9,7 @@ public class PanelManager : Singleton<PanelManager>
     public List<PanelModel> Panels;
 
     //this is going to hold all of our Instances
-    private Queue<panelInstanceModel> _queue =new Queue<panelInstanceModel>();
+    private List<panelInstanceModel> _listInstances =new List<panelInstanceModel>();
 
     public void ShowPanel(string panelId)
     {
@@ -19,7 +19,7 @@ public class PanelManager : Singleton<PanelManager>
             //Create a new Instance
          var newInstancePanel = Instantiate(panelModel.PanelPrefab, transform);
         //Add new panel to the queue
-         _queue.Enqueue( new panelInstanceModel{
+        _listInstances.Add( new panelInstanceModel{
              PanelId = panelId,
              PanelInstance = newInstancePanel
          });
@@ -30,12 +30,13 @@ public class PanelManager : Singleton<PanelManager>
         }
     }
 
-    public void HideLastPanel()
+    public void HideLastPanel(string panelId)
     {   //Make sure we do have panel showing
         if(AnyPanelShowing())
         {
             //Get the last panel showing
-            var lastPanel = _queue.Dequeue();
+            var lastPanel = _listInstances[_listInstances.Count - 1];
+            _listInstances.Remove(lastPanel);
             //Destroy that Instance
             Destroy(lastPanel.PanelInstance);
         }
@@ -49,6 +50,6 @@ public class PanelManager : Singleton<PanelManager>
     //returns how many panels we have in queue
     public int GetAmountPanelsInQueue()
     {
-        return _queue.Count;
+        return _listInstances.Count;
     }
 }
