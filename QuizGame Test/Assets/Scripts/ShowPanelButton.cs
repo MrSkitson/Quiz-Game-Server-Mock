@@ -6,7 +6,10 @@ public class ShowPanelButton : MonoBehaviour
 {
     // the id of the panel we want to show
     public string PanelId;
-    //cashed panel manager
+
+    public PanelShowBehaviour Behavior;
+
+   //cashed panel manager
     private PanelManager _panelManager;
 
     private void Start()
@@ -17,6 +20,6 @@ public class ShowPanelButton : MonoBehaviour
 
     public void DoShowPanel()
     {
-        PanelManager.Instance.ShowPanel(PanelId);
+        PanelManager.Instance.ShowPanel(PanelId, Behavior);
     }
 }

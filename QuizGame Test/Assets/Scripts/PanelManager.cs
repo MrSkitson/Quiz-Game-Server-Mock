@@ -21,14 +21,21 @@ public class PanelManager : Singleton<PanelManager>
         _objectPool = ObjectPool.Instance;
     }
 
-    public void ShowPanel(string panelId) 
+    public void ShowPanel(string panelId, PanelShowBehaviour behavior = PanelShowBehaviour.KEEP_PREVIOUS) 
     {
         GameObject panelInstance = _objectPool.GetObjectfromPool(panelId);
 
         if(panelInstance != null)
         {
-            //Create a new Instance
-         //var newInstancePanel = Instantiate(panelModel.PanelPrefab, transform);
+            if(behavior == PanelShowBehaviour.HIDE_PREVIOUS && GetAmountPanelsInQueue() > 0)
+            {
+               var lastPanel = GetLastPanel(); 
+                if(lastPanel != null)
+                {
+                    lastPanel.PanelInstance.SetActive(false);
+                }
+           }
+
         //Add new panel to the queue
         _listInstances.Add( new panelInstanceModel{
              PanelId = panelId,
@@ -46,13 +53,29 @@ public class PanelManager : Singleton<PanelManager>
         if(AnyPanelShowing())
         {
             //Get the last panel showing
-            var lastPanel = _listInstances[_listInstances.Count - 1];
+            var lastPanel = GetLastPanel();
+
             _listInstances.Remove(lastPanel);
             //Destroy that Instance
             _objectPool.PoolObject(lastPanel.PanelInstance);
+
+            if(GetAmountPanelsInQueue() > 0)
+            {
+                lastPanel =GetLastPanel();
+                if(lastPanel != null && !lastPanel.PanelInstance.activeInHierarchy)
+                {
+                    lastPanel.PanelInstance.SetActive(true);
+                }
+            }
         }
 
     }
+
+     panelInstanceModel GetLastPanel()
+    {
+        return _listInstances[_listInstances.Count - 1];
+    }
+
     //Return if any panel is showing
     public bool AnyPanelShowing()
     {
