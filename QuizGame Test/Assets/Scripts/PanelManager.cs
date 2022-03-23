@@ -6,22 +6,33 @@ using System.Linq;
 public class PanelManager : Singleton<PanelManager>
 {
         //Thw list of all the panels aviarible
-    public List<PanelModel> Panels;
+    //public List<PanelModel> Panels;
+
+    
 
     //this is going to hold all of our Instances
     private List<panelInstanceModel> _listInstances =new List<panelInstanceModel>();
+    //Pool of panels
+    private ObjectPool _objectPool;
 
-    public void ShowPanel(string panelId)
+    private void Start()
     {
-        PanelModel panelModel = Panels.FirstOrDefault(panel => panel.PanelId == panelId);
-        if(panelModel != null)
+        //Cache the object pool
+        _objectPool = ObjectPool.Instance;
+    }
+
+    public void ShowPanel(string panelId) 
+    {
+        GameObject panelInstance = _objectPool.GetObjectfromPool(panelId);
+
+        if(panelInstance != null)
         {
             //Create a new Instance
-         var newInstancePanel = Instantiate(panelModel.PanelPrefab, transform);
+         //var newInstancePanel = Instantiate(panelModel.PanelPrefab, transform);
         //Add new panel to the queue
         _listInstances.Add( new panelInstanceModel{
              PanelId = panelId,
-             PanelInstance = newInstancePanel
+             PanelInstance = panelInstance
          });
         }
         else
@@ -38,7 +49,7 @@ public class PanelManager : Singleton<PanelManager>
             var lastPanel = _listInstances[_listInstances.Count - 1];
             _listInstances.Remove(lastPanel);
             //Destroy that Instance
-            Destroy(lastPanel.PanelInstance);
+            _objectPool.PoolObject(lastPanel.PanelInstance);
         }
 
     }
