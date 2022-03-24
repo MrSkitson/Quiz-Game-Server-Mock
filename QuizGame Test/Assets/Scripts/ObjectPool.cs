@@ -7,6 +7,8 @@ public class ObjectPool : Singleton<ObjectPool>
 {
     //List of the objects to do pooled
    public List<GameObject> PrefabsForPool;
+    
+   public int amountToPool;
 
     // List of the pooled objects
    private List<GameObject> _pooledObjects = new List<GameObject>();
@@ -24,15 +26,19 @@ public class ObjectPool : Singleton<ObjectPool>
        }
 
        //if we don't have a pooled instance
+       
        var prefab = PrefabsForPool.FirstOrDefault(obj => obj.name == objectName);
+      
        if(prefab !=null)
        {
            //Create a new Instance
+    
            var newInstance = Instantiate(prefab, Vector3.zero, Quaternion.identity, transform);
            newInstance.name = objectName;
            return newInstance;
+       
        }
-
+   
        Debug.LogWarning("Object pool desert have a prefab far the object with name " + objectName);
        return null;
    }
