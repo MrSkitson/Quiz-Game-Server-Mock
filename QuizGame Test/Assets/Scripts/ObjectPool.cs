@@ -6,12 +6,13 @@ using System.Linq;
 public class ObjectPool : Singleton<ObjectPool>
 {
     //List of the objects to do pooled
-   public List<GameObject> PrefabsForPool;
-    
-   public int amountToPool;
+   public GameObject[] PrefabsForPool;
+   
+   
 
     // List of the pooled objects
    private List<GameObject> _pooledObjects = new List<GameObject>();
+    public Transform Canvas;
 
    public GameObject GetObjectfromPool(string objectName)
    {
@@ -20,6 +21,7 @@ public class ObjectPool : Singleton<ObjectPool>
        //if we have a pooled instance allreaedy
        if(instance != null)
        {
+           
            _pooledObjects.Remove(instance);
            instance.SetActive(true);
            return instance;
@@ -27,13 +29,15 @@ public class ObjectPool : Singleton<ObjectPool>
 
        //if we don't have a pooled instance
        
-       var prefab = PrefabsForPool.FirstOrDefault(obj => obj.name == objectName);
-      
+       
+           var prefab = PrefabsForPool.FirstOrDefault(obj => obj.name == objectName);
+       
        if(prefab !=null)
        {
            //Create a new Instance
     
-           var newInstance = Instantiate(prefab, Vector3.zero, Quaternion.identity, transform);
+           var newInstance = Instantiate(prefab, prefab.transform.position = new Vector3(27, 29, 0), Quaternion.identity) as GameObject;
+           newInstance.transform.SetParent(Canvas.transform, false);
            newInstance.name = objectName;
            return newInstance;
        

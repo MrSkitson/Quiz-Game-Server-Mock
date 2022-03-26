@@ -8,4 +8,8 @@ public class panelInstanceModel
     public string PanelId;
     //The instance of the panel
     public GameObject PanelInstance;
+    public GameObject BlockButtonBlue;
+    public GameObject BlockButtonGreen;
+    public GameObject BlockButtonRed;
 }
+
