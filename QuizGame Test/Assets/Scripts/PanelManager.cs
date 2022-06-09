@@ -3,87 +3,118 @@ using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
 
-public class PanelManager : Singleton<PanelManager>
+
+public class Screen 
 {
-        //Thw list of all the panels aviarible
-    //public List<PanelModel> Panels;
+    private ICollection<Object> _BtnList = null;
+
+    public Screen()
+    {
+        _BtnList = new List<Object>();
+    }
+
+    public ICollection<Object> BtnList => _BtnList;
+}
+
+
+public class ScreenHash 
+{
+    private List<Screen> _screens = null;
+    public ScreenHash()
+    {
+        _screens = new List<Screen>();
+    }
+    public List<Screen> Screens => _screens;
+}
+
+
+public class PanelManager : MonoBehaviour
+{
+      //List objects to create panlels (5 elements) 
+    public List<GameObject> ListPanel = new List<GameObject>();
+    //Place to Instantiate Panel
+    public Transform root2;
+    //place to Cash  index created Panels
+    private ScreenHash _screensCash;
+    //index created panel with null passibility
+    public int? CurrentSceentIndex { get; set; }
+
+    private void Start()
+    { 
+        _screensCash = new ScreenHash();
+
+    }
+
+    public void CreatePanel()
+    {
+        Clear();
+        //_currentSceentIndex = _currentSceentIndex == null ? 0 : _currentSceentIndex;
+        var currentScreen = new Screen();
+
+        
+        for (int i = 0; i < 5; i++)
+        {
+
+            int index = Random.Range(0, ListPanel.Count);
+            currentScreen.BtnList.Add(ListPanel[index]);
+            
+        }
+        _screensCash.Screens.Add(currentScreen);
+        CurrentSceentIndex = _screensCash.Screens.Count() - 1;
+        DisplayScreen();
+    }
 
     
 
-    //this is going to hold all of our Instances
-    private List<panelInstanceModel> _listInstances =new List<panelInstanceModel>();
-    //Pool of panels
-    private ObjectPool _objectPool;
 
-    private void Start()
+    //Method to desplay have in  out - created panel with current index from Cash method
+    public void DisplayScreen()
     {
-        //Cache the object pool
-        _objectPool = ObjectPool.Instance;
-    }
-
-    public void ShowPanel(string panelId, PanelShowBehaviour behavior = PanelShowBehaviour.KEEP_PREVIOUS) 
-    {
-        GameObject panelInstance = _objectPool.GetObjectfromPool(panelId);
-
-        if(panelInstance != null)
+        Clear();
+        foreach (var item in (_screensCash.Screens[(int)CurrentSceentIndex]).BtnList)
         {
-            if(behavior == PanelShowBehaviour.HIDE_PREVIOUS && GetAmountPanelsInQueue() > 0)
-            {
-               var lastPanel = GetLastPanel(); 
-                if(lastPanel != null)
-                {
-                    lastPanel.PanelInstance.SetActive(false);
-                }
-           }
-
-        //Add new panel to the queue
-        _listInstances.Add( new panelInstanceModel{
-             PanelId = panelId,
-             PanelInstance = panelInstance
-         });
-        }
-        else
-        {
-            Debug.LogWarning( $"trying to use panelId = {panelId} , but this is not in Panels");
+            Instantiate(item, root2);
         }
     }
 
-    public void HideLastPanel(string panelId)
-    {   //Make sure we do have panel showing
-        if(AnyPanelShowing())
+    //Method for clearering panel loop for childCount 
+    void Clear()
+    {
+        for (int i = 0; i < root2.childCount; i++)
         {
-            //Get the last panel showing
-            var lastPanel = GetLastPanel();
+            Destroy(root2.GetChild(i).gameObject);
+        }
+    }
 
-            _listInstances.Remove(lastPanel);
-            //Destroy that Instance
-            _objectPool.PoolObject(lastPanel.PanelInstance);
+    //Method for Next Button in Canvas, get from clicked on Next Button
+    public void NextButtonClicked()
+    {
+        if (CurrentSceentIndex == null)
+        {
+            CreatePanel();
+            return;
+        }
+        CurrentSceentIndex++;
+        if (CurrentSceentIndex == _screensCash.Screens.Count()) { 
 
-            if(GetAmountPanelsInQueue() > 0)
-            {
-                lastPanel =GetLastPanel();
-                if(lastPanel != null && !lastPanel.PanelInstance.activeInHierarchy)
-                {
-                    lastPanel.PanelInstance.SetActive(true);
-                }
-            }
+            CreatePanel();
+        }
+
+        else { DisplayScreen(); }
+    }
+
+    //Method for Previous Button in Canvas, get from clicked on Previous Button. 
+    public void PreviusButtonClicked()
+    {
+        if(CurrentSceentIndex == null || CurrentSceentIndex == 0)
+        {
+            return;
+        }else
+        {
+            CurrentSceentIndex--;
+            DisplayScreen();
         }
 
     }
-
-     panelInstanceModel GetLastPanel()
-    {
-        return _listInstances[_listInstances.Count - 1];
-    }
-
-    //Return if any panel is showing
-    public bool AnyPanelShowing()
-    {
-        return GetAmountPanelsInQueue() > 0;
-    }
-    //returns how many panels we have in queue
-    public int GetAmountPanelsInQueue()
-    {
-        return _listInstances.Count;
-    }
+    
 }
